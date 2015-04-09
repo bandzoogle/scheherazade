@@ -126,8 +126,11 @@ module Scheherazade
       when :text     then "Some #{attribute} text#{seq_string}"
       when :boolean  then false
       else
-        if enum = @model.enum_definitions[attribute]
-          @model.send(attribute.to_s.pluralize).keys.first
+        plural_attr = attribute.to_s.pluralize
+        if @model.respond_to?(plural_attr) && @model.send(plural_attr).is_a?(SimpleEnum::Enum)
+          @model.send(plural_attr).keys.first
+        elsif @model.respond_to?(:enum_definitions) && (enum = @model.enum_definitions[attribute])
+          @model.send(plural_attr).keys.first
         else
           puts "Unknown type for #{@model}##{attribute}"
           nil
